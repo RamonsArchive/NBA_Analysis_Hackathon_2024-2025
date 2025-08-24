@@ -5,7 +5,7 @@ import { useActionState, useState } from "react";
 import { parseServerActionResponse } from "@/lib/utils";
 import { inputSchema } from "@/lib/validation";
 import { z } from "zod";
-import { ActionState } from "@/lib/GlobalTypes";
+import { ActionState, ResultType } from "@/lib/GlobalTypes";
 import { toast } from "sonner";
 import { recommendPlayers } from "@/lib/actions";
 import ViewResults from "./ViewResults";
@@ -19,7 +19,7 @@ const ReviewForm = () => {
   const [heightInput, setHeightInput] = useState("");
   const [ageInput, setAgeInput] = useState("");
   const [positionInput, setPositionInput] = useState("");
-  const [results, setResults] = useState<any>(null);
+  const [results, setResults] = useState<ResultType[] | null>(null);
   const [viewResults, setViewResults] = useState(false);
   const [formKey, setFormKey] = useState(0);
 
@@ -104,10 +104,12 @@ const ReviewForm = () => {
       }
     }
   };
-  const [_state, formAction, isPending] = useActionState(handleFormSubmit, {
+
+  const [, formAction, isPending] = useActionState(handleFormSubmit, {
     status: "INITIAL",
     error: "",
   });
+
   return (
     <div className="flex flex-col gap-6 text-3xl text-black pt-6 border-2 border-gray-200 p-6 rounded-2xl shadow-xl min-w-[300px] max-w-[400px] w-full bg-white">
       <div className="text-center">
@@ -187,9 +189,10 @@ const ReviewForm = () => {
           ></input>
           {errors.position && (
             <p className="text-red-500 text-sm text-wrap">
-              Please enter a valid position. "Center", "Forward", "Guard",
-              "Center-Forward", "Forward-Center", "Forward-Guard",
-              "Guard-Forward"
+              Please enter a valid position. &ldquo;Center&rdquo;,
+              &ldquo;Forward&rdquo;, &ldquo;Guard&rdquo;,
+              &ldquo;Center-Forward&rdquo;, &ldquo;Forward-Center&rdquo;,
+              &ldquo;Forward-Guard&rdquo;, &ldquo;Guard-Forward&rdquo;
             </p>
           )}
         </div>

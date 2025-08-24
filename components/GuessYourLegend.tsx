@@ -24,7 +24,6 @@ const GuessYourLegend = () => {
   const [gameState, setGameState] = useState<"intro" | "playing" | "result">(
     "intro"
   );
-  const [conference, setConference] = useState<string | null>(null); // east, west
   const [currentQuestion, setCurrentQuestion] = useState<string>("");
   const [playersRemaining, setPlayersRemaining] = useState<number>(0);
   const [questionsAsked, setQuestionsAsked] = useState<number>(0);
@@ -39,30 +38,6 @@ const GuessYourLegend = () => {
     const feet = Math.floor(inches / 12);
     const inchesRemainder = Math.round(inches % 12);
     return `${feet}'${inchesRemainder}"`;
-  };
-
-  // Helper function to clean position
-  const cleanPosition = (pos: string): string => {
-    pos = String(pos).toLowerCase();
-    if (pos.includes("guard") && pos.includes("forward")) {
-      return "G-F";
-    }
-    if (
-      (pos.includes("forward") && pos.includes("center")) ||
-      (pos.includes("center") && pos.includes("forward"))
-    ) {
-      return "F-C";
-    }
-    if (pos.includes("forward")) {
-      return "F";
-    }
-    if (pos.includes("center")) {
-      return "C";
-    }
-    if (pos.includes("guard")) {
-      return "G";
-    }
-    return "Unknown";
   };
 
   // Add log message
@@ -82,7 +57,7 @@ const GuessYourLegend = () => {
         );
 
         // Add conference property based on team
-        const enrichedData = playersArray.map((player: any) => {
+        const enrichedData = playersArray.map((player: object) => {
           // Define which teams are in which conference
           const eastTeams = [
             "Celtics",
@@ -120,9 +95,9 @@ const GuessYourLegend = () => {
           ];
 
           let conference;
-          if (eastTeams.includes(player.team)) {
+          if (eastTeams.includes((player as any).team as string)) {
             conference = "east";
-          } else if (westTeams.includes(player.team)) {
+          } else if (westTeams.includes((player as any).team as string)) {
             conference = "west";
           } else {
             // If team is empty or not recognized, default to a conference
@@ -131,7 +106,7 @@ const GuessYourLegend = () => {
           }
 
           // Fix position format for consistency
-          let position = player.position;
+          let position = (player as any).position;
           if (position === "Center-Forward") position = "F-C";
           else if (position === "Forward-Center") position = "F-C";
           else if (position === "Guard-Forward") position = "G-F";
@@ -145,15 +120,15 @@ const GuessYourLegend = () => {
             ...player,
             conference,
             position,
-            height: parseFloat(player.height) || 0,
-            weight: parseFloat(player.weight) || 0,
-            age: parseInt(player.age) || 0,
-            average_points: parseFloat(player.average_points) || 0,
-            average_assists: parseFloat(player.average_assists) || 0,
-            average_rebounds: parseFloat(player.average_rebounds) || 0,
-            average_steals: parseFloat(player.average_steals) || 0,
-            average_blocks: parseFloat(player.average_blocks) || 0,
-            awards_count: parseInt(player.awards_count) || 0,
+            height: parseFloat((player as any).height) || 0,
+            weight: parseFloat((player as any).weight) || 0,
+            age: parseInt((player as any).age) || 0,
+            average_points: parseFloat((player as any).average_points) || 0,
+            average_assists: parseFloat((player as any).average_assists) || 0,
+            average_rebounds: parseFloat((player as any).average_rebounds) || 0,
+            average_steals: parseFloat((player as any).average_steals) || 0,
+            average_blocks: parseFloat((player as any).average_blocks) || 0,
+            awards_count: parseInt((player as any).awards_count) || 0,
           };
         });
 
@@ -349,7 +324,6 @@ const GuessYourLegend = () => {
 
   // Update the selectConference function to initialize the filtered players
   const selectConference = (conf: string): void => {
-    setConference(conf.toLowerCase());
     setGameState("playing");
     const filteredPlayers = nbaData.filter(
       (p) => p.conference === conf.toLowerCase()
@@ -504,12 +478,12 @@ const GuessYourLegend = () => {
       const stat = statMatch ? `average_${statMatch[2]}` : "";
 
       if (answer) {
-        newFilteredPlayers = newFilteredPlayers.filter((p: any) => {
-          return p[stat as string as keyof Player] > value;
+        newFilteredPlayers = newFilteredPlayers.filter((p: Player) => {
+          return (p as Record<string, any>)[stat] > value;
         });
       } else {
-        newFilteredPlayers = newFilteredPlayers.filter((p: any) => {
-          return p[stat as string as keyof Player] <= value;
+        newFilteredPlayers = newFilteredPlayers.filter((p: Player) => {
+          return (p as Record<string, any>)[stat] <= value;
         });
       }
     }
@@ -533,7 +507,6 @@ const GuessYourLegend = () => {
   // Update resetGame to reset the currentFilteredPlayers
   const resetGame = () => {
     setGameState("intro");
-    setConference(null);
     setCurrentQuestion("");
     setPlayersRemaining(0);
     setQuestionsAsked(0);
@@ -560,11 +533,11 @@ const GuessYourLegend = () => {
             <div className="space-y-6 text-center">
               <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-6 rounded-xl border border-purple-100">
                 <p className="text-xl text-gray-800 mb-2">
-                  🔮 Think of an active NBA player and I'll try to guess who it
-                  is!
+                  🔮 Think of an active NBA player and I&apos;ll try to guess
+                  who it is!
                 </p>
                 <p className="text-gray-600">
-                  Select your player's conference:
+                  Select your player&apos;s conference:
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row justify-center gap-4 mt-6">
